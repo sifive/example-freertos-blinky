@@ -21,10 +21,6 @@ __attribute__((constructor)) static void FreeRTOS_init(void);
 __attribute__((constructor)) static void SEGGER_SysView_init(void);
 #endif
 
-#if( configENABLE_FPU == 1 )
-	extern void prvSetupFPU( void );
-#endif /* configENABLE_FPU */
-
 __attribute__((constructor)) static void FreeRTOS_init(void)
 {
 	struct metal_cpu *cpu;
@@ -36,15 +32,11 @@ __attribute__((constructor)) static void FreeRTOS_init(void)
 	/* Remove compiler warning about unused parameter. */
 	( void ) pcErrorMsg;
 
-#if ( configENABLE_FPU == 1 )
-	prvSetupFPU();
-#endif /* (configENABLE_FPU == 1 ) */
-
-  /*
-   * Initilize freedom-metal interrupt managment.
-   *   Its SHOULD be made before calling xPortFreeRTOSInit because
-   *   the interrupt/exeception handler MUST be the freertos handler.
-   */
+	/*
+	 * Initilize freedom-metal interrupt managment.
+	 *   Its SHOULD be made before calling xPortFreeRTOSInit because
+	 *   the interrupt/exeception handler MUST be the freertos handler.
+	 */
 	cpu = metal_cpu_get(metal_cpu_get_current_hartid());
 	if (cpu == NULL)
 	{
@@ -88,12 +80,14 @@ __attribute__((constructor)) static void FreeRTOS_init(void)
 	}
 #endif
 
+#if 0
 	/*
 	 * Call xPortFreeRTOSInit in order to set xISRTopStack
 	 */
 	if ( 0 != xPortFreeRTOSInit((StackType_t)&( xISRStack[ ( configMINIMAL_STACK_SIZE & ~portBYTE_ALIGNMENT_MASK ) - 1 ] ))) {
 		_exit(-1);
 	}
+#endif
 }
 
 
