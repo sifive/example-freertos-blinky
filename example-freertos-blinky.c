@@ -90,6 +90,8 @@ static void prvSetupHardware( void );
  */
 static void prvQueueReceiveTask( void *pvParameters );
 static void prvQueueSendTask( void *pvParameters );
+
+static void force_exit( void );
 /*-----------------------------------------------------------*/
 
 /* The queue used by both tasks. */
@@ -182,6 +184,8 @@ static void prvQueueSendTask( void *pvParameters )
 		xReturned = xQueueSend( xQueue, &ulValueToSend, 0U );
 		configASSERT( xReturned == pdPASS );
 	}
+	// We force the Exit for the SiFive CI/CD */
+	force_exit();
 	vTaskEndScheduler();
 }
 /*-----------------------------------------------------------*/
@@ -276,7 +280,7 @@ void vApplicationMallocFailedHook( void )
 		metal_led_off(led0_red);
 	}
 
-	_exit(1);
+	_exit(-1);
 }
 /*-----------------------------------------------------------*/
 
@@ -314,7 +318,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 		metal_led_off(led0_red);
 	}
 
-	_exit(1);
+	_exit(-1);
 }
 /*-----------------------------------------------------------*/
 
@@ -334,5 +338,16 @@ void vAssertCalled( void )
 		metal_led_off(led0_red);
 	}
 
-	_exit(1);
+	_exit(-1);
 }
+/*-----------------------------------------------------------*/
+
+static void force_exit( void )
+{
+        const char * const pcMessageEnd = "FreeRTOS Demo end\r\n";
+
+        taskDISABLE_INTERRUPTS();
+        write( STDOUT_FILENO, pcMessageEnd, strlen( pcMessageEnd ) );
+        _exit(0);
+}
+/*-----------------------------------------------------------*/
